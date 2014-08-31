@@ -33,37 +33,6 @@ LIVEDIR=$TPDIR/Livecd-root
 ISODIR=$TPDIR/Completed
 DATESTAMP=$(date +%Y%m%d%H%M)
 
-function mksquashfs_old() {
-	# Access squashfs
-	#[ -d $SQUASHMNT ] || mount -o loop $SQUASHFS $SQUASHMNT || fail
-
-	# Clean up build env
-	cat <<EOF | sudo chroot $SQUASHROOT  2> /dev/null
-rm -rf /tmp/* ~/.bash_history
-rm /var/lib/dbus/machine-id
-#rm /sbin/initctl
-#dpkg-divert --rename --remove /sbin/initctl
-umount /proc || umount -lf /proc
-umount /sys
-umount /dev/pts
-EOF
-	sudo umount $SQUASHROOT/dev 
-
-	# Compress Filesystem
-	sudo rm $LIVEDIR/casper/filesystem.squashfs 
-	sudo mksquashfs $SQUASHROOT $LIVEDIR/casper/filesystem.squashfs ||  fail
-
-	# Regenerate Manifest
-	chmod +w $LIVEDIR/casper/filesystem.manifest ||  fail
-	sudo chroot $SQUASHROOT dpkg-query -W --showformat=' $${Package} ${Version}\n' > $LIVEDIR/casper/filesystem.manifest ||  fail
-	sudo cp $LIVEDIR/casper/filesystem.manifest $LIVEDIR/casper/filesystem.manifest-desktop ||  fail
-	sudo sed -i '/ubiquity/d' $LIVEDIR/casper/filesystem.manifest-desktop ||  fail
-	sudo sed -i '/casper/d' $LIVEDIR/casper/filesystem.manifest-desktop ||  fail
-
-	# Update FS size
-	printf $(sudo du -sx --block-size=1 $SQUASHROOT | cut -f1) > $LIVEDIR/casper/filesystem.size ||  fail
-}
-
 function mksquashfs() {
 	sudo remastersys backup cdfs
 	sudo mv $RMSDIR/casper/filesystem.* $LIVEDIR/casper/ || fail
@@ -71,11 +40,6 @@ function mksquashfs() {
 
 function mkiso() {
 	[ -e $ISODIR ] || mkdir $ISODIR || fail
-	# Now handled by Makefile
-	## Compress initrd
-	#pushd $INITDIR
-	#find . | cpio --quiet --dereference -o -H newc | lzma -7 > $LIVEDIR/casper/initrd.lz
-	#popd
 
 	# Recalc md5sums
 	pushd $LIVEDIR ||  fail
