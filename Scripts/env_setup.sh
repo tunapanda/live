@@ -1,22 +1,25 @@
 #!/bin/bash -x
 
-# error codes
-ERRNOISO=1
-ERRCANARIES=2
+LIB="$(dirname ${BASH_SOURCE[0]})"/lib.sh
+if [ ! -e $LIB ] 
+then 
+	echo "ERROR: Required file not found: $LIB" >&2
+	exit 1
+else
+	source $LIB
+fi
+
+require_root
 
 if [ ! -e source.iso ]
 then
 	echo ""
-	echo "FAIL: source.iso not found" >&2
+	echo "ERROR: source.iso not found" >&2
 	echo "  Please copy or symlink the source ISO you want to use to" >&2
 	echo "  source.iso in the build directory" >&2 
 	echo ""
 	exit $ERRNOISO
 fi
-
-function is_mounted() {
-	df -h | grep $(pwd)/$1		
-}
 
 ( [ -e .Livecd-source ] || mkdir .Livecd-source ) &&
 ( [ -e .Initrd-source ] || mkdir .Initrd-source ) &&
@@ -45,7 +48,7 @@ done
 if [ -n "$CANARIES" ] 
 then
 	echo "'.canary' files found\! These dirs may not have mounted properly: $CANARIES" >&2
-	exit $ERRCANARIES
+	exit $ERRMOUNTFAILED
 fi
 
 echo "DONE"

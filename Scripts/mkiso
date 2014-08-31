@@ -1,27 +1,16 @@
 #!/bin/bash -x 
 
-if [ $EUID != 0 ]
-then
-	echo "ERROR: Must be run as root"
+LIB="$(dirname ${BASH_SOURCE[0]})"/lib.sh
+if [ ! -e $LIB ] 
+then 
+	echo "ERROR: Required file not found: $LIB" >&2
 	exit 1
+else
+	source $LIB
 fi
+require_root
 
-function fail() {
-	echo "ERROR"'!'" Essential command failed."
-	exit 2
-}
-
-# Define base working dir as parent of wherever this script lives.
-# Uses a symlink-aware technique for finding script directory, originally from:
-#   http://stackoverflow.com/questions/59895/
-SOURCE="${BASH_SOURCE[0]}"
-while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-  SOURCE="$(readlink "$SOURCE")"
-  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
-done
-TPDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )/.."
-
+TPDIR=$(basedir)
 RMSDIR=$TPDIR/../remastersys/ISOTMP
 SQUASHROOT=$TPDIR/FS-root
 INITDIR=$TPDIR/Initrd-root
