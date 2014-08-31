@@ -2,6 +2,7 @@
 */.bash_history
 */*.swp
 *.iso
-ISO_source/*
-Completed/*
-.unionfs/
+ISO_source
+Completed
+.unionfs
+tmp*
