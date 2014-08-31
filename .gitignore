@@ -5,8 +5,8 @@
 FS-root/.canary
 Initrd-root/.canary
 Livecd-root/.canary
+.Livecd-overlay/tunapanda/VERSION.txt
 ISO_source
 Completed
 .unionfs
 tmp*
-
