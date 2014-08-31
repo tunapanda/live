@@ -27,7 +27,7 @@ function is_mounted() {
 	rm -rf .Initrd-source/* &&
 	pushd .Initrd-source && 
 	lzcat ../Livecd-root/casper/initrd.lz | cpio -idv ; popd ) ) &&
-( is_mounted .FS-source || mount Livecd-root/casper/filesystem.squashfs .FS-source ) &&
+( is_mounted .FS-source || mount .Livecd-source/casper/filesystem.squashfs .FS-source ) &&
 ( is_mounted FS-root || unionfs-fuse -o nonempty -o cow .FS-overlay=rw:.FS-source=ro FS-root ) &&
 ( is_mounted Initrd-root || unionfs-fuse -o nonempty -o cow .Initrd-overlay=rw:.Initrd-source=ro Initrd-root ) &&
 
