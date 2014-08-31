@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash -x
 
 # error codes
 ERRNOISO=1
