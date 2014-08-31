@@ -2,11 +2,9 @@
 */.bash_history
 */*.swp
 *.iso
-FS-root/.canary
-Initrd-root/.canary
-Livecd-root/.canary
+*/.unionfs
+FS-root
+Initrd-root
+Livecd-root
 .Livecd-overlay/tunapanda/VERSION.txt
-ISO_source
 Completed
-.unionfs
-tmp*
