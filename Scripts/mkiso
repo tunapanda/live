@@ -1,0 +1,107 @@
+#!/bin/bash -x 
+
+if [ $EUID != 0 ]
+then
+	echo "ERROR: Must be run as root"
+	exit 1
+fi
+
+function fail() {
+	echo "ERROR"'!'" Essential command failed."
+	exit 2
+}
+
+# Define base working dir as parent of wherever this script lives.
+# Uses a symlink-aware technique for finding script directory, originally from:
+#   http://stackoverflow.com/questions/59895/
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+TPDIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )/.."
+
+#TPDIR=/usr/local/Tunapanda_Data
+#SQUASHFS=$TPDIR/GIT/squashfs/squashfs.btrfs
+#SQUASHMNT=$TPDIR/GIT/squashfs/mnt/
+#SQUASHROOT=$SQUASHMNT/squashfs-root
+RMSDIR=$TPDIR/../remastersys/ISOTMP
+SQUASHROOT=$TPDIR/FS-root
+INITDIR=$TPDIR/Initrd-root
+LIVEDIR=$TPDIR/Livecd-root
+ISODIR=$TPDIR/Completed
+DATESTAMP=$(date +%Y%m%d%H%M)
+
+function mksquashfs_old() {
+	# Access squashfs
+	#[ -d $SQUASHMNT ] || mount -o loop $SQUASHFS $SQUASHMNT || fail
+
+	# Clean up build env
+	cat <<EOF | sudo chroot $SQUASHROOT  2> /dev/null
+rm -rf /tmp/* ~/.bash_history
+rm /var/lib/dbus/machine-id
+#rm /sbin/initctl
+#dpkg-divert --rename --remove /sbin/initctl
+umount /proc || umount -lf /proc
+umount /sys
+umount /dev/pts
+EOF
+	sudo umount $SQUASHROOT/dev 
+
+	# Compress Filesystem
+	sudo rm $LIVEDIR/casper/filesystem.squashfs 
+	sudo mksquashfs $SQUASHROOT $LIVEDIR/casper/filesystem.squashfs ||  fail
+
+	# Regenerate Manifest
+	chmod +w $LIVEDIR/casper/filesystem.manifest ||  fail
+	sudo chroot $SQUASHROOT dpkg-query -W --showformat=' $${Package} ${Version}\n' > $LIVEDIR/casper/filesystem.manifest ||  fail
+	sudo cp $LIVEDIR/casper/filesystem.manifest $LIVEDIR/casper/filesystem.manifest-desktop ||  fail
+	sudo sed -i '/ubiquity/d' $LIVEDIR/casper/filesystem.manifest-desktop ||  fail
+	sudo sed -i '/casper/d' $LIVEDIR/casper/filesystem.manifest-desktop ||  fail
+
+	# Update FS size
+	printf $(sudo du -sx --block-size=1 $SQUASHROOT | cut -f1) > $LIVEDIR/casper/filesystem.size ||  fail
+}
+
+function mksquashfs() {
+	sudo remastersys backup cdfs
+	sudo mv $RMSDIR/casper/filesystem.* $LIVEDIR/casper/ || fail
+}
+
+function mkiso() {
+	# Now handled by Makefile
+	## Compress initrd
+	#pushd $INITDIR
+	#find . | cpio --quiet --dereference -o -H newc | lzma -7 > $LIVEDIR/casper/initrd.lz
+	#popd
+
+	# Recalc md5sums
+	pushd $LIVEDIR ||  fail
+	sudo rm md5sum.txt 	find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt 
+	popd 
+
+	pushd $LIVEDIR ||  fail
+	mkisofs -m '.fuse_*' -D -r -V "Tunapanda-$DATESTAMP" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $ISODIR/tunapanda-${DATESTAMP}.iso . ||  fail
+	popd 
+}
+
+$TPDIR/Scripts/env_setup.sh || fail
+
+if [ $# -eq 0 ] || echo $@ | grep "squashfs" &> /dev/null
+then
+	mksquashfs || fail
+fi
+
+if [ $# -eq 0 ] || echo $@ | grep "iso" &> /dev/null
+then
+	echo "DVD version $DATESTAMP" > $LIVEDIR/tunapanda/VERSION.txt
+	mkiso || fail
+fi
+
+
+pushd $TPDIR
+#git add .
+#git commit -a -m "Commit for Tunapanda-$DATESTAMP.iso" 
+#git tag $DATESTAMP
+popd

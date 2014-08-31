@@ -1,0 +1,63 @@
+#!/bin/sh
+
+PREREQ=""
+DESCRIPTION="Tunapanda custom setup"
+
+prereqs()
+{
+       echo "$PREREQ"
+}
+
+case $1 in
+# get pre-requisites
+prereqs)
+       prereqs
+       exit 0
+       ;;
+esac
+
+. /scripts/casper-functions
+
+log_begin_msg "$DESCRIPTION"
+
+# set up user, whatever remastersys thinks...
+#/bin/sh /scripts/casper-bottom/15autologin
+#/bin/sh /scripts/casper-bottom/25adduser
+
+echo test > /root/etc/TEST-casper
+
+cat > /root/etc/hosts <<EOF
+127.0.0.1	tunapanda localhost
+127.0.1.2	moodle
+127.0.1.3	wikipedia www.wikipedia.org en.wikipedia.org wikipedia.org
+127.0.1.4	askubuntu
+127.0.1.5	ka-lite
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+EOF
+
+#cat > /root/etc/network/interfaces <<EOF
+#auto lo
+#iface lo inet loopback
+#
+#auto eth0
+#iface eth0 inet static
+#  address 192.168.0.253
+#  netmask 255.255.255.0
+#EOF
+
+rm -f /root/home/teacher/Desktop/Wikipedia*.desktop
+rm -f /root/home/teacher/Desktop/ubiquity-*.desktop
+rm -f /root/home/*/.Xauthority
+
+# Need to figure out why this hangs on "configuring ltsp..." in live mode
+#chroot /root /usr/bin/install -o teacher -g teacher -m 744 /usr/share/applications/ltsp-live.desktop /home/teacher/Desktop/
+
+#sed -i 's,Exec=.*,Exec=ubiquity --automatic --desktop %k gtk_ui,' /home/teacher/Desktop/ubiquity-gtkui.desktop
+
+log_end_msg
