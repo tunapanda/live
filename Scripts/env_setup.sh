@@ -19,16 +19,16 @@ function is_mounted() {
 }
 
 ( [ -e .Livecd-source ] || mkdir .Livecd-source ) &&
+( [ -e .Initrd-source ] || mkdir .Initrd-source ) &&
+( [ -e .FS-source     ] || mkdir .FS-source )     &&
 ( is_mounted .Livecd-source || mount -o loop source.iso .Livecd-source ) &&
 ( is_mounted Livecd-root || (
 	unionfs-fuse -o nonempty -o cow .Livecd-overlay=rw:.Livecd-source=ro Livecd-root  &&
 	rm -rf .Initrd-source/* &&
 	pushd .Initrd-source && 
 	lzcat ../Livecd-root/casper/initrd.lz | cpio -idv ; popd ) ) &&
-( [ -e .FS-source ] || mkdir .FS-source ) &&
 ( is_mounted .FS-source || mount Livecd-root/casper/filesystem.squashfs .FS-source ) &&
 ( is_mounted FS-root || unionfs-fuse -o nonempty -o cow .FS-overlay=rw:.FS-source=ro FS-root ) &&
-( [ -e .Initrd-source ] || mkdir .Initrd-source ) &&
 ( is_mounted Initrd-root || unionfs-fuse -o nonempty -o cow .Initrd-overlay=rw:.Initrd-source=ro Initrd-root ) &&
 
 # The mountpoints have '.canary' files in them. If this file is
