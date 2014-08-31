@@ -3,6 +3,7 @@ Build scripts for Tunapanda Edubuntu, a custom variant of Ubuntu/Edubuntu, desig
 
 It is primarily a project by [Tunapanda.Org](http://tunapanda.org), but the goal is to make it into a system that can be used by other organizations with similar goals. 
 
+## How does it work?
 For a technical overview of how the system works, its limitations and its roadmap, see [this document]( https://docs.google.com/document/d/19N5jBC4Ag1mglCEbwayOptUEfUo6TMhCyDVEeAnokVg/edit?usp=sharing). However... 
 
 **NOTE:** For now this is just a generic framework for building customized versions of an exisiting ISO. Very few of the specific changes Tunapanda makes for its version are currently implemented. Instead, you will get essentially a copy of the ISO you put in, plus some Tunapanda branding on the boot menu, and a /usr/local/tunapanda directory on the resulting system. 
