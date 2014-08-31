@@ -16,5 +16,7 @@ Livecd-root/casper/tunapanda.squashfs: .FS-overlay
 	du -sx --block-size=1 .FS-overlay | cut -f1 > Livecd-root/casper/tunapanda.size
 
 .PHONY: clean all env_setup
-clean:
+clean: unmount
+
+unmount:
 	Scripts/env_teardown.sh

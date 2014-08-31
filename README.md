@@ -27,4 +27,6 @@ In Ubuntu, you can get these with `sudo apt-get install unionfs-fuse make geniso
 
 If everything works, you should find your new ISO in a directory called `Completed`. 
 
+**NOTE:** When the build is complete, you may want to unmount all the unionfs stuff by running `make unmount`
+
 Feel free to contact the repository owner if you have questions or comments. 
