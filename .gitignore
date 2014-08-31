@@ -2,7 +2,9 @@
 */.bash_history
 */*.swp
 *.iso
-*/.canary
+FS-root/.canary
+Initrd-root/.canary
+Livecd-root/.canary
 ISO_source
 Completed
 .unionfs
