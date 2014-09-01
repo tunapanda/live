@@ -10,25 +10,17 @@ else
 fi
 require_root
 
-TPDIR=$(basedir)
-RMSDIR=$TPDIR/../remastersys/ISOTMP
-SQUASHROOT=$TPDIR/FS-root
-INITDIR=$TPDIR/Initrd-root
-LIVEDIR=$TPDIR/Livecd-root
-ISODIR=$TPDIR/Completed
 DATESTAMP=$(date +%Y%m%d%H%M)
-
-function mksquashfs() {
-	sudo remastersys backup cdfs
-	sudo mv $RMSDIR/casper/filesystem.* $LIVEDIR/casper/ || fail
-}
+BASEDIR=$(basedir)
+LIVEDIR=$BASEDIR/Livecd-root
+ISODIR=$BASEDIR/Completed
 
 function mkiso() {
 	[ -e $ISODIR ] || mkdir $ISODIR || fail
 
 	# Recalc md5sums
 	pushd $LIVEDIR ||  fail
-	sudo rm md5sum.txt 	find -type f -print0 | sudo xargs -0 md5sum | grep -v isolinux/boot.cat | sudo tee md5sum.txt 
+	rm md5sum.txt 	find -type f -print0 | xargs -0 md5sum | grep -v isolinux/boot.cat | tee md5sum.txt 
 	popd 
 
 	pushd $LIVEDIR ||  fail
@@ -36,20 +28,8 @@ function mkiso() {
 	popd 
 }
 
-$TPDIR/Scripts/env_setup.sh || fail
-
-if [ $# -eq 0 ] || echo $@ | grep "squashfs" &> /dev/null
-then
-	echo "WTF" ; exit 4
-	mksquashfs || fail
-fi
-
-if [ $# -eq 0 ] || echo $@ | grep "iso" &> /dev/null
-then
-	echo "DVD version $DATESTAMP" > $LIVEDIR/tunapanda/VERSION.txt
-	mkiso || fail
-fi
-
-
-pushd $TPDIR
+$BASEDIR/Scripts/env_setup.sh || fail
+pushd $BASEDIR || fail
+echo "DVD version $DATESTAMP" > $LIVEDIR/tunapanda/VERSION.txt
+mkiso || fail
 popd
