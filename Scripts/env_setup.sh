@@ -9,7 +9,7 @@ else
 	source $LIB
 fi
 
-require_root
+UID=$(id -u)
 
 if [ ! -e source.iso ]
 then
@@ -33,13 +33,13 @@ do
 		touch ${d}-root/.canary
 	fi
 done
-( is_mounted .Livecd-source || mount -o loop source.iso .Livecd-source ) &&
+( is_mounted .Livecd-source || sudo mount -o norock,uid=${UID},loop source.iso .Livecd-source ) &&
 ( is_mounted Livecd-root || (
 	unionfs-fuse -o nonempty -o cow .Livecd-overlay=rw:.Livecd-source=ro Livecd-root  &&
 	rm -rf .Initrd-source/* &&
 	pushd .Initrd-source && 
 	lzcat ../Livecd-root/casper/initrd.lz | cpio -idv ; popd ) ) &&
-( is_mounted .FS-source || mount .Livecd-source/casper/filesystem.squashfs .FS-source ) &&
+( is_mounted .FS-source || sudo mount .Livecd-source/casper/filesystem.squashfs .FS-source ) &&
 ( is_mounted FS-root || unionfs-fuse -o nonempty -o cow .FS-overlay=rw:.FS-source=ro FS-root ) &&
 ( is_mounted Initrd-root || unionfs-fuse -o nonempty -o cow .Initrd-overlay=rw:.Initrd-source=ro Initrd-root ) &&
 
