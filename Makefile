@@ -10,6 +10,8 @@ chroot: env_setup
 	sudo chroot FS-root
 
 env_setup: 
+	# env_setup.sh uses sudo later, so force a prompt now
+	@sudo echo ""
 	Scripts/env_setup.sh
 
 Livecd-root:
@@ -17,7 +19,6 @@ Livecd-root:
 	touch Livecd-root/.canary
 
 Livecd-root/casper/initrd.lz: .Initrd-overlay
-	rm -f Livecd-root/casper/initrd.lz
 	cd Initrd-root ; find . | cpio --quiet --dereference -o -H newc | lzma -7 > ../Livecd-root/casper/initrd.lz
 
 Livecd-root/casper/tunapanda.squashfs: .FS-overlay
@@ -28,4 +29,4 @@ Livecd-root/casper/tunapanda.squashfs: .FS-overlay
 clean: unmount
 
 unmount:
-	Scripts/env_teardown.sh
+	sudo Scripts/env_teardown.sh

@@ -33,7 +33,7 @@ do
 		touch ${d}-root/.canary
 	fi
 done
-( is_mounted .Livecd-source || sudo mount -o norock,uid=${UID},loop source.iso .Livecd-source ) &&
+( is_mounted .Livecd-source || sudo mount -o norock,uid=${UID},mode=0644,loop source.iso .Livecd-source ) &&
 ( is_mounted Livecd-root || (
 	unionfs-fuse -o nonempty -o cow .Livecd-overlay=rw:.Livecd-source=ro Livecd-root  &&
 	rm -rf .Initrd-source/* &&
