@@ -20,7 +20,7 @@ function mkiso() {
 
 	# Recalc md5sums
 	pushd $LIVEDIR ||  fail
-	rm md5sum.txt 	find -type f -print0 | xargs -0 md5sum | grep -v isolinux/boot.cat | tee md5sum.txt 
+	rm md5sum.txt ;	find -type f -print0 | xargs -0 md5sum | grep -v isolinux/boot.cat | tee md5sum.txt 
 	popd 
 
 	pushd $LIVEDIR ||  fail
