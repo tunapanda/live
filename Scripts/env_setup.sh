@@ -21,9 +21,18 @@ then
 	exit $ERRNOISO
 fi
 
-( [ -e .Livecd-source ] || mkdir .Livecd-source ) &&
-( [ -e .Initrd-source ] || mkdir .Initrd-source ) &&
-( [ -e .FS-source     ] || mkdir .FS-source )     &&
+for d in Livecd Initrd FS
+do
+	if [ ! -e .${d}-source ] 
+	then
+		mkdir .${d}-source
+	fi
+	if [ ! -e ${d}-root ]
+	then
+		mkdir ${d}-root
+		touch ${d}-root/.canary
+	fi
+done
 ( is_mounted .Livecd-source || mount -o loop source.iso .Livecd-source ) &&
 ( is_mounted Livecd-root || (
 	unionfs-fuse -o nonempty -o cow .Livecd-overlay=rw:.Livecd-source=ro Livecd-root  &&

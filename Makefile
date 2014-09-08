@@ -9,22 +9,15 @@ chroot: env_setup
 	sudo Scripts/setup_live_chroot.sh FS-root
 	sudo chroot FS-root
 
-env_setup: Livecd-root FS-root Initrd-root
+env_setup: 
 	Scripts/env_setup.sh
 
 Livecd-root:
 	mkdir Livecd-root
 	touch Livecd-root/.canary
 
-FS-root:
-	mkdir FS-root
-	touch FS-root/.canary
-
-Initrd-root:
-	mkdir Initrd-root
-	touch Initrd-root/.canary
-
 Livecd-root/casper/initrd.lz: .Initrd-overlay
+	rm -f Livecd-root/casper/initrd.lz
 	cd Initrd-root ; find . | cpio --quiet --dereference -o -H newc | lzma -7 > ../Livecd-root/casper/initrd.lz
 
 Livecd-root/casper/tunapanda.squashfs: .FS-overlay
