@@ -5,6 +5,10 @@
 */.unionfs
 FS-root
 Initrd-root
+.Initrd-source
 Livecd-root
+.Livecd-overlay/casper/filesystem.*
+.Livecd-overlay/casper/tunapanda.*
+.Livecd-overlay/md5sum.txt
 .Livecd-overlay/tunapanda/VERSION.txt
 Completed
